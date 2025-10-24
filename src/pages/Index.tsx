@@ -618,6 +618,278 @@ const Index = () => {
       </WindowContainer>
 
       <WindowContainer
+        id="calendar"
+        title="КАЛЕНДАРЬ"
+        icon="Calendar"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[700px]"
+      >
+        <div className="space-y-4">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-secondary mb-2">
+              {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+            </h2>
+            <p className="text-muted-foreground">{new Date().toLocaleDateString('ru-RU', { weekday: 'long' })}</p>
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+              <div key={day} className="text-center font-bold text-secondary p-2">{day}</div>
+            ))}
+            {Array.from({ length: 35 }, (_, i) => (
+              <Card key={i} className="p-3 bg-card/50 border-primary/20 hover:border-primary/50 cursor-pointer transition-all text-center">
+                <span className="text-foreground">{(i % 28) + 1}</span>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="files"
+        title="ФАЙЛОВЫЙ МЕНЕДЖЕР"
+        icon="FolderOpen"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[800px]"
+      >
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button className="bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30">
+              <Icon name="FolderPlus" size={20} className="mr-2" />
+              Новая папка
+            </Button>
+            <Button className="bg-secondary/20 border border-secondary/50 text-secondary hover:bg-secondary/30">
+              <Icon name="Upload" size={20} className="mr-2" />
+              Загрузить
+            </Button>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {['Документы', 'Изображения', 'Видео', 'Музыка', 'Загрузки', 'Проекты'].map(folder => (
+              <Card key={folder} className="p-4 bg-card/50 border-primary/30 hover:border-primary cursor-pointer transition-all">
+                <Icon name="Folder" size={48} className="text-primary mx-auto mb-2" />
+                <p className="text-center text-sm text-foreground">{folder}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="chat"
+        title="ЧАТ"
+        icon="MessageSquare"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[600px]"
+      >
+        <div className="space-y-4">
+          <div className="h-[400px] overflow-y-auto space-y-3 p-4 bg-card/30 rounded-lg">
+            <Card className="p-3 bg-primary/10 border-primary/30 max-w-[80%]">
+              <p className="text-sm text-foreground">Привет! Как дела?</p>
+              <p className="text-xs text-muted-foreground mt-1">10:30</p>
+            </Card>
+            <Card className="p-3 bg-secondary/10 border-secondary/30 max-w-[80%] ml-auto">
+              <p className="text-sm text-foreground">Отлично! Работаю над проектом 🚀</p>
+              <p className="text-xs text-muted-foreground mt-1">10:32</p>
+            </Card>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Введите сообщение..."
+              className="flex-1 bg-input border-accent/50"
+            />
+            <Button className="bg-accent text-black hover:bg-accent/90">
+              <Icon name="Send" size={20} />
+            </Button>
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="email"
+        title="ПОЧТА"
+        icon="Mail"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[900px]"
+      >
+        <div className="space-y-4">
+          <Button className="bg-primary text-black hover:bg-primary/90">
+            <Icon name="Plus" size={20} className="mr-2" />
+            Написать письмо
+          </Button>
+          <div className="space-y-2">
+            {['Важное письмо от команды', 'Еженедельный отчет', 'Приглашение на встречу'].map((subject, i) => (
+              <Card key={i} className="p-4 bg-card/50 border-primary/30 hover:border-primary cursor-pointer transition-all">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground">{subject}</h4>
+                    <p className="text-sm text-muted-foreground">support@anomaly.dev</p>
+                  </div>
+                  <Badge variant="secondary">Новое</Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="maps"
+        title="КАРТЫ"
+        icon="Map"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[900px]"
+      >
+        <div className="space-y-4">
+          <Input
+            placeholder="Поиск на карте..."
+            className="bg-input border-secondary/50"
+          />
+          <div className="h-[500px] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg border-2 border-primary/30 flex items-center justify-center">
+            <Icon name="MapPin" size={80} className="text-primary opacity-30" />
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="settings"
+        title="НАСТРОЙКИ"
+        icon="Settings"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[700px]"
+      >
+        <div className="space-y-6">
+          {[
+            { icon: 'User', title: 'Профиль', desc: 'Управление аккаунтом' },
+            { icon: 'Palette', title: 'Оформление', desc: 'Темы и цвета' },
+            { icon: 'Bell', title: 'Уведомления', desc: 'Настройки оповещений' },
+            { icon: 'Shield', title: 'Безопасность', desc: 'Пароли и доступ' },
+            { icon: 'Wifi', title: 'Сеть', desc: 'Подключения и VPN' },
+            { icon: 'HardDrive', title: 'Хранилище', desc: 'Управление данными' },
+          ].map((item, i) => (
+            <Card key={i} className="p-4 bg-card/50 border-accent/30 hover:border-accent cursor-pointer transition-all">
+              <div className="flex items-center gap-4">
+                <Icon name={item.icon as any} size={32} className="text-accent" />
+                <div className="flex-1">
+                  <h4 className="font-bold text-foreground">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="camera"
+        title="КАМЕРА"
+        icon="Camera"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[800px]"
+      >
+        <div className="space-y-4">
+          <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg border-2 border-primary/30 flex items-center justify-center">
+            <Icon name="Camera" size={100} className="text-primary opacity-30" />
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Button className="bg-primary text-black hover:bg-primary/90">
+              <Icon name="Camera" size={20} className="mr-2" />
+              Сделать фото
+            </Button>
+            <Button className="bg-secondary text-black hover:bg-secondary/90">
+              <Icon name="Video" size={20} className="mr-2" />
+              Запись видео
+            </Button>
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="terminal"
+        title="ТЕРМИНАЛ"
+        icon="Terminal"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[900px]"
+      >
+        <div className="space-y-4">
+          <div className="bg-black/90 p-4 rounded-lg font-mono text-sm min-h-[400px]">
+            <p className="text-primary">$ ANOMALY OS v2.0</p>
+            <p className="text-secondary">$ System ready...</p>
+            <p className="text-accent">$ Awaiting commands...</p>
+            <p className="text-foreground mt-4">$ <span className="animate-pulse">_</span></p>
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="code"
+        title="РЕДАКТОР КОДА"
+        icon="Code"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[1000px]"
+      >
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button className="bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30 text-xs">
+              index.tsx
+            </Button>
+            <Button className="bg-secondary/20 border border-secondary/50 text-secondary hover:bg-secondary/30 text-xs">
+              styles.css
+            </Button>
+          </div>
+          <div className="bg-black/90 p-4 rounded-lg font-mono text-sm min-h-[500px]">
+            <p className="text-secondary">{'// ANOMALY Code Editor'}</p>
+            <p className="text-accent">{'import { useState } from "react";'}</p>
+            <p className="text-primary">{'function App() {'}</p>
+            <p className="text-foreground ml-4">{'return <div>Hello World</div>;'}</p>
+            <p className="text-primary">{'}'}</p>
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
+        id="health"
+        title="МОНИТОРИНГ ЗДОРОВЬЯ"
+        icon="Heart"
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+        width="w-[700px]"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="p-6 bg-card/50 border-primary/30 text-center">
+              <Icon name="Heart" size={48} className="text-primary mx-auto mb-3" />
+              <p className="text-3xl font-bold text-primary">72</p>
+              <p className="text-sm text-muted-foreground">BPM</p>
+            </Card>
+            <Card className="p-6 bg-card/50 border-secondary/30 text-center">
+              <Icon name="Footprints" size={48} className="text-secondary mx-auto mb-3" />
+              <p className="text-3xl font-bold text-secondary">8,542</p>
+              <p className="text-sm text-muted-foreground">Шагов</p>
+            </Card>
+            <Card className="p-6 bg-card/50 border-accent/30 text-center">
+              <Icon name="Flame" size={48} className="text-accent mx-auto mb-3" />
+              <p className="text-3xl font-bold text-accent">420</p>
+              <p className="text-sm text-muted-foreground">Калорий</p>
+            </Card>
+            <Card className="p-6 bg-card/50 border-primary/30 text-center">
+              <Icon name="Moon" size={48} className="text-primary mx-auto mb-3" />
+              <p className="text-3xl font-bold text-primary">7.5</p>
+              <p className="text-sm text-muted-foreground">Часов сна</p>
+            </Card>
+          </div>
+        </div>
+      </WindowContainer>
+
+      <WindowContainer
         id="gaming"
         title="ИГРОВОЙ РЕЖИМ"
         icon="Gamepad2"
@@ -628,6 +900,16 @@ const Index = () => {
           <Icon name="Gamepad2" size={80} className="text-primary mx-auto pulse-glow" />
           <h3 className="text-2xl font-bold text-primary">РЕЖИМ АКТИВИРОВАН</h3>
           <p className="text-muted-foreground">Оптимизация производительности...</p>
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            <Card className="p-4 bg-card/50 border-primary/30">
+              <p className="text-sm text-muted-foreground">FPS</p>
+              <p className="text-3xl font-bold text-primary">144</p>
+            </Card>
+            <Card className="p-4 bg-card/50 border-secondary/30">
+              <p className="text-sm text-muted-foreground">Ping</p>
+              <p className="text-3xl font-bold text-secondary">12ms</p>
+            </Card>
+          </div>
         </div>
       </WindowContainer>
     </div>

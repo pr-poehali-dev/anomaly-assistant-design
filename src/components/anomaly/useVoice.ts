@@ -44,6 +44,14 @@ export const useVoice = ({
         toast({ title: '🎤 Голосовая команда', description: 'Система активирована' });
       }
     }
+
+    if (command.includes('деактивир') || command.includes('выключ')) {
+      if (isActive) {
+        setIsActive(false);
+        speak('Система деактивирована');
+        toast({ title: '🎤 Система выключена' });
+      }
+    }
     
     if (command.includes('задач') || command.includes('задачи')) {
       setActiveWindow('tasks');
@@ -61,6 +69,12 @@ export const useVoice = ({
       setActiveWindow('timer');
       speak('Запускаю таймер');
       toast({ title: '🎤 Открываю таймер' });
+    }
+
+    if (command.includes('календар')) {
+      setActiveWindow('calendar');
+      speak('Открываю календарь');
+      toast({ title: '🎤 Открываю календарь' });
     }
     
     if (command.includes('умный дом') || command.includes('дом')) {
@@ -98,6 +112,60 @@ export const useVoice = ({
       speak('Открываю музыкальный плеер');
       toast({ title: '🎤 Открываю музыку' });
     }
+
+    if (command.includes('файл')) {
+      setActiveWindow('files');
+      speak('Открываю файловый менеджер');
+      toast({ title: '🎤 Открываю файлы' });
+    }
+
+    if (command.includes('чат') || command.includes('сообщени')) {
+      setActiveWindow('chat');
+      speak('Открываю чат');
+      toast({ title: '🎤 Открываю чат' });
+    }
+
+    if (command.includes('почт') || command.includes('email')) {
+      setActiveWindow('email');
+      speak('Открываю почту');
+      toast({ title: '🎤 Открываю почту' });
+    }
+
+    if (command.includes('карт')) {
+      setActiveWindow('maps');
+      speak('Открываю карты');
+      toast({ title: '🎤 Открываю карты' });
+    }
+
+    if (command.includes('настройк')) {
+      setActiveWindow('settings');
+      speak('Открываю настройки');
+      toast({ title: '🎤 Открываю настройки' });
+    }
+
+    if (command.includes('камер')) {
+      setActiveWindow('camera');
+      speak('Активирую камеру');
+      toast({ title: '🎤 Активирую камеру' });
+    }
+
+    if (command.includes('терминал') || command.includes('консол')) {
+      setActiveWindow('terminal');
+      speak('Открываю терминал');
+      toast({ title: '🎤 Открываю терминал' });
+    }
+
+    if (command.includes('редактор') || command.includes('код')) {
+      setActiveWindow('code');
+      speak('Запускаю редактор кода');
+      toast({ title: '🎤 Запускаю редактор' });
+    }
+
+    if (command.includes('здоров')) {
+      setActiveWindow('health');
+      speak('Открываю мониторинг здоровья');
+      toast({ title: '🎤 Открываю здоровье' });
+    }
     
     if (command.includes('игр') || command.includes('gaming')) {
       setActiveWindow('gaming');
@@ -105,19 +173,55 @@ export const useVoice = ({
       toast({ title: '🎤 Активирую игровой режим' });
     }
     
-    if (command.includes('включи свет') || command.includes('свет')) {
-      const lightDevice = devices.find(d => d.type === 'light');
+    if (command.includes('включи свет') || command.includes('свет вкл')) {
+      const lightDevice = devices.find(d => d.type === 'light' && !d.status);
       if (lightDevice) {
         toggleDevice(lightDevice.id);
         speak('Свет включён');
         toast({ title: '🎤 Свет включён' });
       }
     }
+
+    if (command.includes('выключи свет') || command.includes('свет выкл')) {
+      const lightDevice = devices.find(d => d.type === 'light' && d.status);
+      if (lightDevice) {
+        toggleDevice(lightDevice.id);
+        speak('Свет выключён');
+        toast({ title: '🎤 Свет выключен' });
+      }
+    }
+
+    if (command.includes('включи все')) {
+      devices.forEach(d => {
+        if (!d.status) toggleDevice(d.id);
+      });
+      speak('Все устройства включены');
+      toast({ title: '🎤 Все устройства включены' });
+    }
+
+    if (command.includes('выключи все')) {
+      devices.forEach(d => {
+        if (d.status) toggleDevice(d.id);
+      });
+      speak('Все устройства выключены');
+      toast({ title: '🎤 Все устройства выключены' });
+    }
+
+    if (command.includes('температур')) {
+      speak(`Температура ${weatherData.temp} градусов`);
+      toast({ title: '🎤 Температура', description: `${weatherData.temp}°C` });
+    }
     
     if (command.includes('закрой') || command.includes('закрыть')) {
       setActiveWindow(null);
       speak('Окно закрыто');
       toast({ title: '🎤 Окно закрыто' });
+    }
+
+    if (command.includes('закрой все')) {
+      setActiveWindow(null);
+      speak('Все окна закрыты');
+      toast({ title: '🎤 Все окна закрыты' });
     }
     
     if (command.includes('добавь задачу')) {
@@ -134,6 +238,18 @@ export const useVoice = ({
         toast({ title: '🎤 Задача добавлена', description: taskText });
       }
     }
+
+    if (command.includes('сколько задач')) {
+      const activeCount = tasks.filter(t => !t.completed).length;
+      speak(`У вас ${activeCount} активных задач`);
+      toast({ title: '🎤 Задачи', description: `${activeCount} активных` });
+    }
+
+    if (command.includes('удали все задачи')) {
+      setTasks([]);
+      speak('Все задачи удалены');
+      toast({ title: '🎤 Все задачи удалены' });
+    }
     
     if (command.includes('время') || command.includes('который час')) {
       const now = new Date();
@@ -142,10 +258,43 @@ export const useVoice = ({
       speak(`Сейчас ${hours} часов ${minutes} минут`);
       toast({ title: '🎤 Время', description: `${hours}:${minutes.toString().padStart(2, '0')}` });
     }
+
+    if (command.includes('дата') || command.includes('какое число')) {
+      const now = new Date();
+      const date = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+      speak(`Сегодня ${date}`);
+      toast({ title: '🎤 Дата', description: date });
+    }
+
+    if (command.includes('день недели')) {
+      const now = new Date();
+      const day = now.toLocaleDateString('ru-RU', { weekday: 'long' });
+      speak(`Сегодня ${day}`);
+      toast({ title: '🎤 День недели', description: day });
+    }
     
     if (command.includes('статистика') || command.includes('система')) {
       speak(`Загрузка процессора ${systemStats.cpu} процентов, оперативной памяти ${systemStats.ram} процентов`);
       toast({ title: '🎤 Системная статистика', description: `CPU: ${systemStats.cpu}%, RAM: ${systemStats.ram}%` });
+    }
+
+    if (command.includes('помощь') || command.includes('справка') || command.includes('что ты умеешь')) {
+      speak('Я могу открывать приложения, управлять задачами и устройствами, показывать время и погоду. Скажите открыть приложение или добавить задачу');
+      toast({ title: '🎤 Справка', description: 'Доступны команды: открыть, добавить, включить, выключить, время, погода' });
+    }
+
+    if (command.includes('перезагрузк')) {
+      speak('Перезагружаю систему');
+      toast({ title: '🎤 Перезагрузка системы' });
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+
+    if (command.includes('очисти экран')) {
+      setActiveWindow(null);
+      speak('Экран очищен');
+      toast({ title: '🎤 Экран очищен' });
     }
   };
 
