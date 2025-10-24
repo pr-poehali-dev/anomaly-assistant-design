@@ -55,6 +55,8 @@ const Index = () => {
   const [weatherData] = useState({ temp: 23, condition: 'Ясно', humidity: 65 });
   const [musicVolume, setMusicVolume] = useState([50]);
   const [systemStats, setSystemStats] = useState({ cpu: 45, ram: 62, disk: 78 });
+  const [isListening, setIsListening] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -87,6 +89,145 @@ const Index = () => {
     }, 2000);
     return () => clearInterval(statsInterval);
   }, []);
+
+  useEffect(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'ru-RU';
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result: any) => result.transcript)
+        .join('');
+      
+      setVoiceTranscript(transcript);
+      
+      if (event.results[event.results.length - 1].isFinal) {
+        processVoiceCommand(transcript.toLowerCase());
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      if (isListening) {
+        recognition.start();
+      }
+    };
+
+    if (isListening) {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+
+    return () => {
+      recognition.stop();
+    };
+  }, [isListening]);
+
+  const processVoiceCommand = (command: string) => {
+    if (command.includes('аномалия') || command.includes('активировать')) {
+      if (!isActive) {
+        setIsActive(true);
+        toast({ title: '🎤 Голосовая команда', description: 'Система активирована' });
+      }
+    }
+    
+    if (command.includes('задач') || command.includes('задачи')) {
+      setActiveWindow('tasks');
+      toast({ title: '🎤 Открываю задачи' });
+    }
+    
+    if (command.includes('заметк')) {
+      setActiveWindow('notes');
+      toast({ title: '🎤 Открываю заметки' });
+    }
+    
+    if (command.includes('таймер')) {
+      setActiveWindow('timer');
+      toast({ title: '🎤 Открываю таймер' });
+    }
+    
+    if (command.includes('умный дом') || command.includes('дом')) {
+      setActiveWindow('smart-home');
+      toast({ title: '🎤 Открываю умный дом' });
+    }
+    
+    if (command.includes('калькулятор') || command.includes('посчитай')) {
+      setActiveWindow('calculator');
+      toast({ title: '🎤 Открываю калькулятор' });
+    }
+    
+    if (command.includes('погод')) {
+      setActiveWindow('weather');
+      toast({ title: '🎤 Открываю погоду' });
+    }
+    
+    if (command.includes('новост')) {
+      setActiveWindow('news');
+      toast({ title: '🎤 Открываю новости' });
+    }
+    
+    if (command.includes('перевод') || command.includes('переведи')) {
+      setActiveWindow('translate');
+      toast({ title: '🎤 Открываю переводчик' });
+    }
+    
+    if (command.includes('музык')) {
+      setActiveWindow('music');
+      toast({ title: '🎤 Открываю музыку' });
+    }
+    
+    if (command.includes('игр') || command.includes('gaming')) {
+      setActiveWindow('gaming');
+      toast({ title: '🎤 Активирую игровой режим' });
+    }
+    
+    if (command.includes('включи свет') || command.includes('свет')) {
+      const lightDevice = devices.find(d => d.type === 'light');
+      if (lightDevice) {
+        toggleDevice(lightDevice.id);
+        toast({ title: '🎤 Свет включён' });
+      }
+    }
+    
+    if (command.includes('закрой') || command.includes('закрыть')) {
+      setActiveWindow(null);
+      toast({ title: '🎤 Окно закрыто' });
+    }
+    
+    if (command.includes('добавь задачу')) {
+      const taskText = command.replace(/добавь задачу/gi, '').trim();
+      if (taskText) {
+        setTasks([...tasks, { 
+          id: Date.now().toString(), 
+          text: taskText, 
+          completed: false,
+          priority: 'medium',
+          category: 'general'
+        }]);
+        toast({ title: '🎤 Задача добавлена', description: taskText });
+      }
+    }
+  };
+
+  const toggleVoiceListening = () => {
+    setIsListening(!isListening);
+    toast({
+      title: !isListening ? '🎤 ГОЛОСОВОЕ УПРАВЛЕНИЕ' : '🎤 Микрофон выключен',
+      description: !isListening ? 'Слушаю команды...' : 'Голосовое управление деактивировано',
+    });
+  };
 
   const handleActivate = () => {
     setIsActive(!isActive);
@@ -260,6 +401,18 @@ const Index = () => {
                 <span className="text-foreground">{new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <Button
+                onClick={toggleVoiceListening}
+                size="sm"
+                className={`px-6 font-bold border-2 transition-all ${
+                  isListening
+                    ? 'bg-secondary text-black border-secondary shadow-[0_0_20px_rgba(255,0,110,0.6)] animate-pulse' 
+                    : 'bg-transparent text-secondary border-secondary/50 hover:border-secondary'
+                }`}
+              >
+                <Icon name="Mic" size={16} className="mr-2" />
+                {isListening ? 'СЛУШАЮ' : 'ГОЛОС'}
+              </Button>
+              <Button
                 onClick={handleActivate}
                 size="sm"
                 className={`px-6 font-bold border-2 transition-all ${
@@ -287,6 +440,19 @@ const Index = () => {
         {isActive && (
           <>
             <main className="flex-1 container mx-auto px-6 py-8">
+              {isListening && voiceTranscript && (
+                <div className="mb-6 animate-fade-in">
+                  <Card className="bg-secondary/20 border-2 border-secondary/60 neon-box p-4">
+                    <div className="flex items-center gap-3">
+                      <Icon name="Mic" size={24} className="text-secondary pulse-glow" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground mb-1">Распознаю команду...</p>
+                        <p className="text-lg text-foreground font-medium">{voiceTranscript}</p>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              )}
               <div className="mb-8">
                 <Card className="bg-card/80 border-2 border-primary/40 neon-box p-6">
                   <div className="relative">
