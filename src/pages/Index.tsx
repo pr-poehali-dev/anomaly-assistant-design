@@ -67,11 +67,22 @@ const Index = () => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ru-RU';
     utterance.rate = 1.1;
-    utterance.pitch = 1.0;
+    utterance.pitch = 1.2;
     utterance.volume = 1.0;
     
     const voices = window.speechSynthesis.getVoices();
-    const russianVoice = voices.find(voice => voice.lang.includes('ru'));
+    const femaleVoice = voices.find(voice => 
+      voice.lang.includes('ru') && 
+      (voice.name.toLowerCase().includes('female') || 
+       voice.name.toLowerCase().includes('woman') ||
+       voice.name.toLowerCase().includes('anna') ||
+       voice.name.toLowerCase().includes('elena') ||
+       voice.name.toLowerCase().includes('irina') ||
+       voice.name.toLowerCase().includes('milena'))
+    );
+    
+    const russianVoice = femaleVoice || voices.find(voice => voice.lang.includes('ru'));
+    
     if (russianVoice) {
       utterance.voice = russianVoice;
     }
