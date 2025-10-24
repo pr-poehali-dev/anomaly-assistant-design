@@ -57,7 +57,27 @@ const Index = () => {
   const [systemStats, setSystemStats] = useState({ cpu: 45, ram: 62, disk: 78 });
   const [isListening, setIsListening] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const { toast } = useToast();
+
+  const speak = (text: string) => {
+    if (!voiceEnabled || !('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ru-RU';
+    utterance.rate = 1.1;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const russianVoice = voices.find(voice => voice.lang.includes('ru'));
+    if (russianVoice) {
+      utterance.voice = russianVoice;
+    }
+    
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -66,6 +86,7 @@ const Index = () => {
         setTimerSeconds(prev => {
           if (prev <= 1) {
             setIsTimerRunning(false);
+            speak('Таймер завершён. Время истекло.');
             toast({
               title: "⏰ ТАЙМЕР ЗАВЕРШЁН",
               description: "Время истекло!",
@@ -77,7 +98,7 @@ const Index = () => {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning, timerSeconds, toast]);
+  }, [isTimerRunning, timerSeconds, toast, voiceEnabled]);
 
   useEffect(() => {
     const statsInterval = setInterval(() => {
@@ -139,57 +160,68 @@ const Index = () => {
     if (command.includes('аномалия') || command.includes('активировать')) {
       if (!isActive) {
         setIsActive(true);
+        speak('Система активирована. Все системы в рабочем состоянии.');
         toast({ title: '🎤 Голосовая команда', description: 'Система активирована' });
       }
     }
     
     if (command.includes('задач') || command.includes('задачи')) {
       setActiveWindow('tasks');
+      speak('Открываю менеджер задач');
       toast({ title: '🎤 Открываю задачи' });
     }
     
     if (command.includes('заметк')) {
       setActiveWindow('notes');
+      speak('Открываю заметки');
       toast({ title: '🎤 Открываю заметки' });
     }
     
     if (command.includes('таймер')) {
       setActiveWindow('timer');
+      speak('Запускаю таймер');
       toast({ title: '🎤 Открываю таймер' });
     }
     
     if (command.includes('умный дом') || command.includes('дом')) {
       setActiveWindow('smart-home');
+      speak('Активирую панель управления умным домом');
       toast({ title: '🎤 Открываю умный дом' });
     }
     
     if (command.includes('калькулятор') || command.includes('посчитай')) {
       setActiveWindow('calculator');
+      speak('Открываю калькулятор');
       toast({ title: '🎤 Открываю калькулятор' });
     }
     
     if (command.includes('погод')) {
       setActiveWindow('weather');
+      speak(`Погода: ${weatherData.temp} градусов, ${weatherData.condition.toLowerCase()}`);
       toast({ title: '🎤 Открываю погоду' });
     }
     
     if (command.includes('новост')) {
       setActiveWindow('news');
+      speak('Загружаю последние новости');
       toast({ title: '🎤 Открываю новости' });
     }
     
     if (command.includes('перевод') || command.includes('переведи')) {
       setActiveWindow('translate');
+      speak('Запускаю переводчик');
       toast({ title: '🎤 Открываю переводчик' });
     }
     
     if (command.includes('музык')) {
       setActiveWindow('music');
+      speak('Открываю музыкальный плеер');
       toast({ title: '🎤 Открываю музыку' });
     }
     
     if (command.includes('игр') || command.includes('gaming')) {
       setActiveWindow('gaming');
+      speak('Активирую игровой режим');
       toast({ title: '🎤 Активирую игровой режим' });
     }
     
@@ -197,12 +229,14 @@ const Index = () => {
       const lightDevice = devices.find(d => d.type === 'light');
       if (lightDevice) {
         toggleDevice(lightDevice.id);
+        speak('Свет включён');
         toast({ title: '🎤 Свет включён' });
       }
     }
     
     if (command.includes('закрой') || command.includes('закрыть')) {
       setActiveWindow(null);
+      speak('Окно закрыто');
       toast({ title: '🎤 Окно закрыто' });
     }
     
@@ -216,16 +250,48 @@ const Index = () => {
           priority: 'medium',
           category: 'general'
         }]);
+        speak(`Задача добавлена: ${taskText}`);
         toast({ title: '🎤 Задача добавлена', description: taskText });
       }
+    }
+    
+    if (command.includes('время') || command.includes('который час')) {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      speak(`Сейчас ${hours} часов ${minutes} минут`);
+      toast({ title: '🎤 Время', description: `${hours}:${minutes.toString().padStart(2, '0')}` });
+    }
+    
+    if (command.includes('статистика') || command.includes('система')) {
+      speak(`Загрузка процессора ${systemStats.cpu} процентов, оперативной памяти ${systemStats.ram} процентов`);
+      toast({ title: '🎤 Системная статистика', description: `CPU: ${systemStats.cpu}%, RAM: ${systemStats.ram}%` });
     }
   };
 
   const toggleVoiceListening = () => {
-    setIsListening(!isListening);
+    const newState = !isListening;
+    setIsListening(newState);
+    if (newState) {
+      speak('Голосовое управление активировано. Слушаю команды.');
+    } else {
+      speak('Голосовое управление деактивировано.');
+    }
     toast({
-      title: !isListening ? '🎤 ГОЛОСОВОЕ УПРАВЛЕНИЕ' : '🎤 Микрофон выключен',
-      description: !isListening ? 'Слушаю команды...' : 'Голосовое управление деактивировано',
+      title: newState ? '🎤 ГОЛОСОВОЕ УПРАВЛЕНИЕ' : '🎤 Микрофон выключен',
+      description: newState ? 'Слушаю команды...' : 'Голосовое управление деактивировано',
+    });
+  };
+
+  const toggleVoiceResponses = () => {
+    const newState = !voiceEnabled;
+    setVoiceEnabled(newState);
+    if (newState) {
+      speak('Голосовые ответы включены');
+    }
+    toast({
+      title: newState ? '🔊 Голос включён' : '🔇 Голос выключен',
+      description: newState ? 'Система будет отвечать голосом' : 'Только текстовые уведомления',
     });
   };
 
@@ -400,6 +466,15 @@ const Index = () => {
                 <Icon name="Clock" size={16} className="text-accent" />
                 <span className="text-foreground">{new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
+              <Button
+                onClick={toggleVoiceResponses}
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+                title="Вкл/выкл голосовые ответы"
+              >
+                <Icon name={voiceEnabled ? "Volume2" : "VolumeX"} size={20} />
+              </Button>
               <Button
                 onClick={toggleVoiceListening}
                 size="sm"
